@@ -1,1 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#05050F"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="CreatorBoost.AI"/>
+<meta name="description" content="AI-powered content generation platform for creators"/>
+<title>CreatorBoost.AI</title>
+<link rel="manifest" href="manifest.json"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+::-webkit-scrollbar{width:0;height:0;}
+body{font-family:'Outfit',sans-serif;background:#05050F;color:#F2F2FF;max-width:440px;margin:0 auto;min-height:100vh;overflow-x:hidden;}
+input,button,textarea,select{font-family:'Outfit',sans-serif;}
+input::placeholder{color:#555;}
+button{cursor:pointer;border:none;outline:none;}
+input{outline:none;}
+.fade-up{animation:fadeUp 0.4s ease forwards;}
+.slide-up{animation:slideUp 0.35s cubic-bezier(.4,0,.2,1) forwards;}
+.spin{animation:spin 0.7s linear infinite;}
+.blink{animation:blink 1.5s infinite;}
+.load-bar{animation:loadBar 1.8s ease-in-out infinite;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(110%)}to{transform:translateX(-50%) translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+@keyframes loadBar{0%{width:0;margin-left:0}50%{width:70%;margin-left:15%}100%{width:0;margin-left:100%}}
+@keyframes pulse{0%,100%{box-shadow:0 6px 28px rgba(124,58,237,0.65)}50%{box-shadow:0 6px 40px rgba(124,58,237,0.9)}}
+.bg-grad{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 20% 0%,#120040 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,#001840 0%,transparent 50%),#05050F;}
+.content{position:relative;z-index:1;}
+.page{display:none;}.page.active{display:block;}
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);}
+.sidebar{position:fixed;top:0;left:-300px;bottom:0;z-index:60;width:285px;background:#0b0b1c;border-right:1px solid rgba(255,255,255,0.07);transition:left 0.32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:none;}
+.sidebar.open{left:0;box-shadow:14px 0 60px rgba(0,0,0,0.55);}
+.bottom-sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(110%);width:100%;max-width:440px;z-index:100;background:#0d0d1e;border-radius:26px 26px 0 0;border:1px solid rgba(255,255,255,0.07);padding:0 20px 46px;max-height:84vh;overflow-y:auto;transition:transform 0.35s cubic-bezier(.4,0,.2,1);}
+.bottom-sheet.open{transform:translateX(-50%) translateY(0);}
+.fab{position:fixed;bottom:26px;right:18px;z-index:100;width:62px;height:62px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);background:linear-gradient(135deg,#7c3aed,#a78bfa);box-shadow:0 8px 32px rgba(124,58,237,0.65),0 0 0 8px rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;animation:pulse 3s infinite;}
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25);border-radius:100px;padding:5px 16px;font-size:10px;color:#a78bfa;letter-spacing:2px;}
+.plan-bar{margin:0 16px 14px;padding:11px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;}
+.platform-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.platform-btn{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.07);border-radius:13px;padding:12px 13px;display:flex;align-items:center;gap:9px;transition:all 0.2s;width:100%;}
+.platform-btn.active{border-color:var(--pcolor);}
+.type-btn{padding:9px 16px;border-radius:100px;font-size:12px;font-weight:700;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.07);color:#606080;transition:all 0.2s;}
+.type-btn.active{background:linear-gradient(135deg,#7c3aed,#a78bfa);border-color:transparent;color:#fff;box-shadow:0 4px 18px rgba(124,58,237,0.38);}
+.gen-btn{width:100%;padding:18px;border-radius:18px;border:none;background:rgba(255,255,255,0.04);color:#606080;font-size:15px;font-weight:900;letter-spacing:1px;transition:all 0.3s;}
+.gen-btn.ready{background:linear-gradient(135deg,#7c3aed,#a78bfa,#38bdf8);color:#fff;box-shadow:0 10px 44px rgba(124,58,237,0.45);}
+.copy-btn{position:absolute;bottom:16px;right:16px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;border-radius:13px;padding:11px 22px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;transition:all 0.3s;}
+.copy-btn.copied{background:linear-gradient(135deg,#00c875,#00ff88);}
+.news-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:18px;padding:16px;margin-bottom:11px;cursor:pointer;transition:all 0.2s;}
+.news-card:hover{border-color:rgba(167,139,250,0.4);transform:translateY(-2px);}
+.hot-card{flex-shrink:0;width:215px;background:rgba(255,255,255,0.04);border:1px solid rgba(244,114,182,0.2);border-radius:20px;padding:15px;cursor:pointer;transition:all 0.2s;}
+.inp{width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.07);border-radius:13px;padding:14px 16px;color:#F2F2FF;font-size:13px;transition:border 0.2s;}
+.inp:focus{border-color:#a78bfa;}
+.inp-err{border-color:#ff5555 !important;}
+.err-msg{font-size:11px;color:#ff5555;margin-top:5px;}
+.tone-btn{padding:10px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.07);background:none;cursor:pointer;text-align:left;transition:all 0.2s;width:100%;}
+.tone-btn.active{border-color:#a78bfa;background:rgba(167,139,250,0.12);}
+.aud-btn{padding:8px 12px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.07);background:none;cursor:pointer;font-size:11px;font-weight:700;color:#606080;white-space:nowrap;transition:all 0.2s;}
+.aud-btn.active{border-color:#38bdf8;background:rgba(56,189,248,0.12);color:#38bdf8;}
+.len-btn{flex:1;padding:11px 8px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.07);background:none;cursor:pointer;text-align:center;transition:all 0.2s;}
+.len-btn.active{border-color:#f472b6;background:rgba(244,114,182,0.1);}
+.msg-ai{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:20px 20px 20px 4px;padding:12px 16px;max-width:82%;font-size:14px;line-height:1.75;white-space:pre-wrap;}
+.msg-user{background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:20px 20px 4px 20px;padding:12px 16px;max-width:82%;font-size:14px;line-height:1.75;color:#fff;white-space:pre-wrap;}
+.sub-plan{border:2px solid rgba(255,255,255,0.07);border-radius:22px;padding:20px 18px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;margin-bottom:12px;}
+.sub-plan.selected{border-color:var(--pcolor);}
+.pay-inp{width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.07);border-radius:13px;padding:13px 16px;color:#F2F2FF;font-size:13px;font-family:'Outfit',sans-serif;}
+.pay-inp:focus{outline:none;border-color:var(--gwcolor);}
+.section-label{font-size:10px;color:#606080;letter-spacing:2px;font-weight:700;margin-bottom:8px;}
+</style>
+</head>
+<body>
+<div class="bg-grad"></div>
+<div class="content">
 
+<!-- LOGIN PAGE -->
+<div id="page-login" class="page active" style="min-height:100vh;padding:0 24px 40px;">
+  <div style="text-align:center;padding-top:56px;padding-bottom:28px;">
+    <div style="display:inline-flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:24px;background:linear-gradient(135deg,#7c3aed,#a78bfa,#38bdf8);box-shadow:0 10px 36px rgba(124,58,237,0.6);margin-bottom:20px;">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="white"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <div style="font-size:28px;font-weight:900;letter-spacing:-0.5px;margin-bottom:6px;">Creator<span style="background:linear-gradient(90deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Boost</span><span style="opacity:0.35;font-size:22px;">.AI</span></div>
+    <div style="font-size:13px;color:#606080;line-height:1.6;">The Ultimate AI Platform for Creators</div>
+  </div>
+
+  <div style="display:flex;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:4px;margin-bottom:22px;gap:4px;">
+    <button id="btn-login-mode" onclick="setLoginMode('login')" style="flex:1;padding:12px;border-radius:13px;font-size:14px;font-weight:700;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;transition:all 0.25s;">Sign In</button>
+    <button id="btn-signup-mode" onclick="setLoginMode('signup')" style="flex:1;padding:12px;border-radius:13px;font-size:14px;font-weight:700;background:none;color:#606080;transition:all 0.25s;">Create Account</button>
+  </div>
+
+  <button onclick="googleLogin()" style="width:100%;padding:15px;border-radius:16px;border:1.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:#F2F2FF;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;">
+    <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    Continue with Google
+  </button>
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><div style="flex:1;height:1px;background:rgba(255,255,255,0.08);"></div><span style="font-size:12px;color:#606080;font-weight:600;">or</span><div style="flex:1;height:1px;background:rgba(255,255,255,0.08);"></div></div>
+
+  <div style="display:flex;gap:6px;margin-bottom:18px;">
+    <button id="btn-email-method" onclick="setMethod('email')" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #a78bfa;background:rgba(167,139,250,0.1);color:#a78bfa;font-size:12px;font-weight:700;">📧 Email</button>
+    <button id="btn-mobile-method" onclick="setMethod('mobile')" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.08);background:none;color:#606080;font-size:12px;font-weight:700;">📱 Mobile OTP</button>
+  </div>
+
+  <div id="email-form">
+    <div id="name-field" style="display:none;margin-bottom:12px;">
+      <div class="section-label">FULL NAME</div>
+      <input id="inp-name" class="inp" placeholder="Your full name"/>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div class="section-label">EMAIL ADDRESS</div>
+      <input id="inp-email" class="inp" type="email" placeholder="you@email.com"/>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div class="section-label">PASSWORD</div>
+      <div style="position:relative;">
+        <input id="inp-pass" class="inp" type="password" placeholder="Enter password" style="padding-right:48px;"/>
+        <button onclick="togglePass()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;color:#606080;font-size:16px;">👁️</button>
+      </div>
+    </div>
+    <div id="forgot-link" style="text-align:right;margin-bottom:4px;"><button style="background:none;color:#a78bfa;font-size:12px;font-weight:600;">Forgot Password?</button></div>
+  </div>
+
+  <div id="mobile-form" style="display:none;">
+    <div style="margin-bottom:12px;">
+      <div class="section-label">MOBILE NUMBER</div>
+      <div style="display:flex;gap:8px;">
+        <div style="background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.07);border-radius:13px;padding:14px 12px;font-size:13px;color:#606080;font-weight:700;flex-shrink:0;">🇮🇳 +91</div>
+        <input id="inp-mobile" class="inp" type="tel" maxlength="10" placeholder="10-digit number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"/>
+      </div>
+    </div>
+    <button id="send-otp-btn" onclick="sendOtp()" style="width:100%;padding:14px;border-radius:13px;background:rgba(255,255,255,0.05);color:#444;font-size:13px;font-weight:800;margin-bottom:12px;">Send OTP</button>
+    <div id="otp-section" style="display:none;">
+      <div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:10px 14px;font-size:12px;color:#00ff88;font-weight:600;margin-bottom:12px;">✓ OTP sent! <button onclick="resetMobile()" style="margin-left:8px;background:none;color:#a78bfa;font-size:11px;font-weight:700;">Change</button></div>
+      <div class="section-label">ENTER OTP</div>
+      <input id="inp-otp" class="inp" type="tel" maxlength="6" placeholder="6-digit OTP" style="font-size:22px;letter-spacing:10px;text-align:center;font-family:'JetBrains Mono',monospace;" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"/>
+    </div>
+  </div>
+
+  <div id="login-err" style="display:none;margin-top:12px;padding:11px 14px;background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.25);border-radius:12px;font-size:12px;color:#ff6b6b;font-weight:600;"></div>
+
+  <button id="submit-btn" onclick="doLogin()" style="width:100%;margin-top:20px;padding:17px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#a78bfa,#38bdf8);color:#fff;font-size:15px;font-weight:900;box-shadow:0 10px 40px rgba(124,58,237,0.45);">Sign In to Creator Boost AI</button>
+
+  <div style="text-align:center;margin-top:18px;font-size:11px;color:#606080;line-height:1.75;">By continuing, you agree to our Terms of Service and Privacy Policy.<br/>No personal data is stored on our servers.</div>
+  <div style="text-align:center;padding:20px 0 10px;font-size:10px;color:#606080;">© 2026 Creator Boost AI · Secured and Encrypted</div>
+</div>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page" style="padding-bottom:90px;">
+  <!-- Sidebar Overlay -->
+  <div id="sidebar-overlay" class="overlay" style="display:none;" onclick="closeSidebar()"></div>
+  <!-- Sidebar -->
+  <div id="sidebar" class="sidebar">
+    <div style="padding:26px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.07);">
+      <div style="font-size:16px;font-weight:900;">Creator<span style="background:linear-gradient(90deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Boost</span><span style="opacity:0.35;font-size:12px;">.AI</span></div>
+      <div style="font-size:10px;color:#606080;margin-top:8px;">Content Intelligence Platform</div>
+      <div id="sidebar-plan-badge" style="margin-top:14px;padding:10px 14px;border-radius:14px;display:flex;align-items:center;gap:10px;"></div>
+      <div id="sidebar-user" style="margin-top:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:8px;"></div>
+      <button onclick="closeSidebar()" style="position:absolute;top:22px;right:18px;background:none;color:#606080;font-size:22px;">✕</button>
+    </div>
+    <div id="sidebar-nav" style="padding:10px 8px;flex:1;overflow-y:auto;">
+      <button onclick="openSidebarPage('about')" class="side-nav-btn">◎ About Us ›</button>
+      <button onclick="openSidebarPage('policy')" class="side-nav-btn">⚖ App Policy ›</button>
+      <button onclick="openSidebarPage('terms')" class="side-nav-btn">📄 Terms & Conditions ›</button>
+      <button onclick="openSidebarPage('privacy')" class="side-nav-btn">🔒 Privacy Policy ›</button>
+      <button onclick="openSidebarPage('support')" class="side-nav-btn">💬 Customer Support ›</button>
+      <button onclick="openSidebarPage('language')" class="side-nav-btn">🌐 Language ›</button>
+    </div>
+    <div id="sidebar-sub" style="display:none;flex:1;overflow-y:auto;padding:14px 16px;"></div>
+    <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,0.07);font-size:10px;color:#606080;text-align:center;">© 2026 Creator Boost AI · No Data Stored</div>
+  </div>
+
+  <!-- Top Bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 18px 12px;">
+    <button onclick="openSidebar()" style="background:none;padding:6px;display:flex;flex-direction:column;gap:5.5px;">
+      <span style="display:block;width:23px;height:2px;background:#F2F2FF;border-radius:2px;"></span>
+      <span style="display:block;width:16px;height:2px;background:#F2F2FF;border-radius:2px;"></span>
+      <span style="display:block;width:20px;height:2px;background:#F2F2FF;border-radius:2px;"></span>
+    </button>
+    <div style="font-size:16px;font-weight:900;">Creator<span style="background:linear-gradient(90deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Boost</span><span style="opacity:0.35;font-size:12px;">.AI</span></div>
+    <button onclick="toggleTheme()" id="theme-btn" style="background:none;border:1.5px solid rgba(255,255,255,0.07);border-radius:100px;padding:6px 11px;font-size:15px;color:#F2F2FF;">☀</button>
+  </div>
+
+  <!-- Plan Bar -->
+  <div id="home-plan-bar" class="plan-bar"></div>
+
+  <!-- Hero -->
+  <div style="text-align:center;padding:0 20px 14px;">
+    <div class="chip blink" style="margin-bottom:14px;"><span style="width:5px;height:5px;border-radius:50%;background:#a78bfa;display:inline-block;"></span> FRESH OUTPUT · AI POWERED · VIRAL CONTENT</div>
+    <h1 style="font-size:27px;font-weight:900;line-height:1.1;margin-bottom:10px;">Go Viral with<br/><span style="background:linear-gradient(135deg,#a78bfa,#38bdf8,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">AI Content Magic ✨</span></h1>
+    <p style="color:#606080;font-size:12px;line-height:1.6;">Professional content · Every platform · Every language</p>
+  </div>
+
+  <!-- News Button -->
+  <div style="padding:0 16px 14px;display:flex;justify-content:center;">
+    <button onclick="showPage('news')" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(244,114,182,0.12),rgba(167,139,250,0.08));border:1.5px solid rgba(244,114,182,0.3);border-radius:100px;padding:10px 24px;color:#f472b6;font-size:12px;font-weight:800;">
+      <span class="blink">🔥</span>Global Trending News<span style="opacity:0.55;">›</span>
+    </button>
+  </div>
+
+  <!-- Limit Warning -->
+  <div id="limit-warn" style="display:none;margin:0 16px 14px;padding:16px;background:rgba(244,114,182,0.08);border:1px solid rgba(244,114,182,0.25);border-radius:16px;text-align:center;">
+    <div style="font-size:13px;font-weight:700;color:#f472b6;margin-bottom:10px;">🔒 Daily limit reached</div>
+    <button onclick="showPage('sub')" style="padding:9px 22px;background:linear-gradient(135deg,#f472b6,#a78bfa);border-radius:100px;color:#fff;font-size:12px;font-weight:800;">Upgrade Plan →</button>
+  </div>
+
+  <!-- Topic -->
+  <div style="padding:0 16px 12px;">
+    <div class="section-label" style="margin-bottom:9px;">YOUR TOPIC</div>
+    <input id="topic-inp" class="inp" placeholder="Enter any topic, news, or idea..." oninput="checkGenBtn()"/>
+  </div>
+
+  <!-- Advanced Settings -->
+  <div style="padding:0 16px 14px;">
+    <button onclick="toggleAdvanced()" id="adv-btn" style="width:100%;padding:11px 16px;border-radius:13px;border:1.5px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.04);color:#606080;font-size:12px;font-weight:700;display:flex;align-items:center;justif
